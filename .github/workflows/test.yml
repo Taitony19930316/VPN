@@ -1,0 +1,46 @@
+name: Test
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: [3.7, 3.8, 3.9, '3.10', '3.11']
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Test help command
+      run: |
+        python vpn_manager_cross_platform.py help
+    
+    - name: Test config validator
+      run: |
+        python config_validator.py config/test-config.yaml
+    
+    - name: Test cross-platform detection
+      run: |
+        python -c "
+        from vpn_manager_cross_platform import CrossPlatformVPNManager
+        manager = CrossPlatformVPNManager()
+        print(f'System: {manager.system}')
+        print(f'Architecture: {manager.arch}')
+        print(f'Config dir: {manager.config_dir}')
+        "

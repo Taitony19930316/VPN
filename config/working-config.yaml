@@ -1,0 +1,115 @@
+# 可用的测试配置 - 使用公共测试服务器
+port: 7890
+socks-port: 7891
+allow-lan: true
+mode: rule
+log-level: info
+external-controller: 127.0.0.1:9090
+
+dns:
+  enable: true
+  listen: 0.0.0.0:53
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  nameserver:
+    - 223.5.5.5
+    - 119.29.29.29
+  fallback:
+    - 8.8.8.8
+    - 1.1.1.1
+
+# 使用一些公开的测试服务器（仅供测试）
+proxies:
+  # 免费Shadowsocks测试服务器
+  - name: "Free-SS-1"
+    type: ss
+    server: "134.195.196.26"
+    port: 443
+    cipher: "aes-256-gcm"
+    password: "g5MeD6Ft3CWlJId"
+    udp: true
+
+  - name: "Free-SS-2"
+    type: ss
+    server: "172.99.190.87"
+    port: 8080
+    cipher: "aes-256-gcm"
+    password: "KixLvKzwjekG00rm"
+    udp: true
+
+  # VMess测试服务器
+  - name: "Free-VMess-1"
+    type: vmess
+    server: "v2ray1.ssrsub.one"
+    port: 80
+    uuid: "30e9bdfa-4d2d-4ccb-8b7f-f4e8e41bb4a5"
+    alterId: 0
+    cipher: auto
+    network: ws
+    ws-opts:
+      path: "/"
+
+proxy-groups:
+  - name: "🚀 节点选择"
+    type: select
+    proxies:
+      - "♻️ 自动选择"
+      - "Free-SS-1"
+      - "Free-SS-2"
+      - "Free-VMess-1"
+      - "🎯 全球直连"
+
+  - name: "♻️ 自动选择"
+    type: url-test
+    proxies:
+      - "Free-SS-1"
+      - "Free-SS-2"
+      - "Free-VMess-1"
+    url: 'http://www.gstatic.com/generate_204'
+    interval: 300
+    tolerance: 50
+
+  - name: "🎯 全球直连"
+    type: select
+    proxies:
+      - DIRECT
+
+rules:
+  # 开发工具走代理
+  - DOMAIN-SUFFIX,github.com,🚀 节点选择
+  - DOMAIN-SUFFIX,githubusercontent.com,🚀 节点选择
+  - DOMAIN-SUFFIX,githubassets.com,🚀 节点选择
+  - DOMAIN-SUFFIX,google.com,🚀 节点选择
+  - DOMAIN-SUFFIX,googleapis.com,🚀 节点选择
+  - DOMAIN-SUFFIX,googleusercontent.com,🚀 节点选择
+  - DOMAIN-SUFFIX,gstatic.com,🚀 节点选择
+  - DOMAIN-SUFFIX,stackoverflow.com,🚀 节点选择
+  - DOMAIN-SUFFIX,npmjs.org,🚀 节点选择
+  - DOMAIN-SUFFIX,pypi.org,🚀 节点选择
+  - DOMAIN-SUFFIX,docker.com,🚀 节点选择
+  - DOMAIN-SUFFIX,docker.io,🚀 节点选择
+  
+  # 国内网站直连
+  - DOMAIN-SUFFIX,baidu.com,🎯 全球直连
+  - DOMAIN-SUFFIX,taobao.com,🎯 全球直连
+  - DOMAIN-SUFFIX,tmall.com,🎯 全球直连
+  - DOMAIN-SUFFIX,jd.com,🎯 全球直连
+  - DOMAIN-SUFFIX,qq.com,🎯 全球直连
+  - DOMAIN-SUFFIX,163.com,🎯 全球直连
+  - DOMAIN-SUFFIX,sina.com.cn,🎯 全球直连
+  - DOMAIN-SUFFIX,bilibili.com,🎯 全球直连
+  - DOMAIN-SUFFIX,cnpmjs.org,🎯 全球直连
+  - DOMAIN-SUFFIX,npm.taobao.org,🎯 全球直连
+  - DOMAIN-SUFFIX,registry.npmmirror.com,🎯 全球直连
+  
+  # 局域网直连
+  - IP-CIDR,192.168.0.0/16,🎯 全球直连
+  - IP-CIDR,10.0.0.0/8,🎯 全球直连
+  - IP-CIDR,172.16.0.0/12,🎯 全球直连
+  - IP-CIDR,127.0.0.0/8,🎯 全球直连
+  
+  # 中国IP直连
+  - GEOIP,CN,🎯 全球直连
+  
+  # 其他走代理
+  - MATCH,🚀 节点选择
