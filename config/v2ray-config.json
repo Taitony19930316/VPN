@@ -1,0 +1,141 @@
+{
+  "log": {
+    "loglevel": "warning"
+  },
+  "inbounds": [
+    {
+      "port": 1080,
+      "protocol": "socks",
+      "settings": {
+        "auth": "noauth",
+        "udp": true
+      }
+    },
+    {
+      "port": 8080,
+      "protocol": "http"
+    }
+  ],
+  "outbounds": [
+    {
+      "tag": "proxy",
+      "protocol": "vmess",
+      "settings": {
+        "vnext": [
+          {
+            "address": "your-server.com",
+            "port": 443,
+            "users": [
+              {
+                "id": "your-uuid-here",
+                "alterId": 0,
+                "security": "auto"
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "ws",
+        "security": "tls",
+        "wsSettings": {
+          "path": "/path"
+        }
+      }
+    },
+    {
+      "tag": "direct",
+      "protocol": "freedom"
+    },
+    {
+      "tag": "block",
+      "protocol": "blackhole"
+    }
+  ],
+  "routing": {
+    "domainStrategy": "IPIfNonMatch",
+    "rules": [
+      {
+        "type": "field",
+        "domain": [
+          "github.com",
+          "githubusercontent.com",
+          "githubassets.com",
+          "npmjs.org",
+          "npmjs.com",
+          "yarnpkg.com",
+          "pypi.org",
+          "python.org",
+          "golang.org",
+          "docker.com",
+          "docker.io",
+          "google.com",
+          "googleapis.com",
+          "googleusercontent.com",
+          "gstatic.com",
+          "stackoverflow.com",
+          "medium.com"
+        ],
+        "outboundTag": "proxy"
+      },
+      {
+        "type": "field",
+        "domain": [
+          "baidu.com",
+          "taobao.com",
+          "tmall.com",
+          "jd.com",
+          "qq.com",
+          "163.com",
+          "sina.com.cn",
+          "sohu.com",
+          "youku.com",
+          "iqiyi.com",
+          "bilibili.com",
+          "cnpmjs.org",
+          "npm.taobao.org",
+          "registry.npmmirror.com",
+          "gitee.com",
+          "coding.net"
+        ],
+        "outboundTag": "direct"
+      },
+      {
+        "type": "field",
+        "ip": [
+          "192.168.0.0/16",
+          "10.0.0.0/8",
+          "172.16.0.0/12",
+          "127.0.0.0/8"
+        ],
+        "outboundTag": "direct"
+      },
+      {
+        "type": "field",
+        "ip": [
+          "geoip:cn"
+        ],
+        "outboundTag": "direct"
+      },
+      {
+        "type": "field",
+        "domain": [
+          "geosite:cn"
+        ],
+        "outboundTag": "direct"
+      }
+    ]
+  },
+  "dns": {
+    "servers": [
+      "223.5.5.5",
+      "119.29.29.29",
+      {
+        "address": "8.8.8.8",
+        "domains": [
+          "geosite:geolocation-!cn"
+        ]
+      }
+    ]
+  }
+}
